@@ -1,0 +1,5 @@
+It seems like the OCR is not able to accurately detect the floating numbers in the image, and is instead producing incorrect characters. This may be due to a variety of factors such as poor image quality, font size and style, or text positioning.
+
+To improve the accuracy of the OCR output, you may want to experiment with different preprocessing techniques such as adjusting the contrast, applying filters, or segmenting the text in the image. Additionally, you may want to consider training your own OCR model on a dataset of similar images to improve accuracy.
+
+Alternatively, if the structure of the data in the image is consistent, you may be able to use computer vision techniques to extract the data directly without relying on OCR. This could involve using techniques such as contour detection, template matching, or edge detection to identify and extract the data elements in the image.
