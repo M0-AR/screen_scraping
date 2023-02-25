@@ -206,7 +206,7 @@ while x > cursor_x:
 # Release the left mouse button
 pyautogui.mouseUp(button='left')
 # Delay the click for 1 second
-time.sleep(1)
+time.sleep(2)
 # ----------------------------------- Select the whole data -------------------------------------
 import time
 
@@ -267,6 +267,9 @@ keyboard.release('c')
 
 # Release the Ctrl key
 keyboard.release('ctrl')
+
+time.sleep(1)
+
 
 # ----------------------------- Save to Excel ------------------------------
 import win32com.client as win32
