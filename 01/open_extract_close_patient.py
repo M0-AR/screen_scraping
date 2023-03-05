@@ -2,6 +2,7 @@ import pyautogui
 import cv2
 import numpy as np
 import time
+from extract_data_from_columns import extract_data_from_columns
 
 
 def click_by_mouse_on(position, move_x=0, move_y=0):
@@ -66,37 +67,39 @@ def input_cpr_nr(cpr_nr):
     # Release the Ctrl key
     keyboard.release('ctrl')
 
-
 cpr_nrs = read_cpr_nr_from_excel()
-cpr_nr = cpr_nrs[0]
+i = 0
+for cpr_nr in cpr_nrs:
+    click_by_mouse_on('01-patientopslag.jpg')
+    # Delay the click for 1 second
+    time.sleep(1)
 
-# for cpr_nr in cpr_nrs:
-click_by_mouse_on('01-patientopslag.jpg')
-# Delay the click for 1 second
-time.sleep(1)
+    input_cpr_nr(cpr_nr)
+    # Delay the click for 1 second
+    time.sleep(1)
 
-input_cpr_nr(cpr_nr)
-# Delay the click for 1 second
-time.sleep(1)
+    click_by_mouse_on('03-find-patient.jpg')
+    # Delay the click for 1 second
+    time.sleep(1)
 
-click_by_mouse_on('03-find-patient.jpg')
-# Delay the click for 1 second
-time.sleep(1)
+    click_by_mouse_on('04-vaelg.jpg')
+    # Delay the click for 1 second
+    time.sleep(1)
 
-click_by_mouse_on('04-vaelg.jpg')
-# Delay the click for 1 second
-time.sleep(1)
+    click_by_mouse_on('05-if-aabn-journal.jpg')
+    # Delay the click for 1 second
+    time.sleep(3)
 
-click_by_mouse_on('05-if-aabn-journal.jpg')
-# Delay the click for 1 second
-time.sleep(1)
+    click_by_mouse_on('06-laboratoriesvar.jpg')
+    # Delay the click for 1 second
+    time.sleep(3)
 
-click_by_mouse_on('06-laboratoriesvar.jpg')
-# Delay the click for 1 second
-time.sleep(2)
+    cpr_nr = i
+    i += 1
+    extract_data_from_columns(cpr_nr)
+    # Delay the click for 1 second
+    time.sleep(1)
 
-# TODO: call extract-data-from-columns
-
-click_by_mouse_on('08-close-by-x.jpg', 75, 0)
-# Delay the click for 1 second
-time.sleep(1)
+    click_by_mouse_on('08-close-by-x.jpg', 75, 0)
+    # Delay the click for 1 second
+    time.sleep(1)

@@ -8,8 +8,16 @@ all_data = ''
 copied_text = ''
 
 
-def save_data_to_excel(cprNumber):
+def save_data_to_excel(cpr_nr):
+    import os
+    import shutil
     import win32com.client as win32
+
+    # Clear the gen_py folder
+    try:
+        shutil.rmtree(os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'gen_py'))
+    except:
+        pass
 
     # Create an instance of the Excel application
     excel = win32.gencache.EnsureDispatch('Excel.Application')
@@ -31,7 +39,7 @@ def save_data_to_excel(cprNumber):
         sheet.Cells(i + 1, 1).Value = line
 
     # Save the workbook with the name 'cprNumber'
-    workbook.SaveAs(cprNumber)
+    workbook.SaveAs(cpr_nr)
 
     # Close the workbook
     workbook.Close()
@@ -70,7 +78,7 @@ def select_all_columns_and_copy():
     gray = cv2.cvtColor(screenshotNP, cv2.COLOR_BGR2GRAY)
 
     # Load the template image
-    template = cv2.imread('alle-raekker.jpg', cv2.IMREAD_GRAYSCALE)
+    template = cv2.imread('07-alle-raekker.jpg', cv2.IMREAD_GRAYSCALE)
 
     # Find the text on the screenshot using template matching
     result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
@@ -114,20 +122,24 @@ def select_all_columns_and_copy():
     time.sleep(1)
 
 
-while True:
-    select_all_columns_and_copy()
+def extract_data_from_columns(cpr_nr):
+    while True:
+        select_all_columns_and_copy()
 
-    # get the copied text from clipboard
-    copied_text = pyperclip.paste()
+        # get the copied text from clipboard
+        global copied_text
+        copied_text = pyperclip.paste()
 
-    # if data already exist that mean we are in the last page
-    if copied_text in all_data:
-        break
+        # if data already exist that mean we are in the last page
+        global all_data
+        if copied_text in all_data:
+            break
 
-    # collect the whole data in data variable
-    all_data = copied_text + '\n' + all_data + '\n'
+        # collect the whole data in data variable
+        all_data = copied_text + '\n' + all_data + '\n'
 
-    go_one_page_back()
+        go_one_page_back()
 
-print(all_data)
-save_data_to_excel('010136-0458')
+    save_data_to_excel(cpr_nr)
+    copied_text = ''
+    all_data = ''
