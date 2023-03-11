@@ -3,49 +3,7 @@ import pyperclip
 import numpy as np
 import pyautogui
 import time
-
-all_data = ''
-copied_text = ''
-
-
-def save_data_to_excel(cpr_nr):
-    import os
-    import shutil
-    import win32com.client as win32
-
-    # Clear the gen_py folder
-    try:
-        shutil.rmtree(os.path.join(os.environ['LOCALAPPDATA'], 'Temp', 'gen_py'))
-    except:
-        pass
-
-    # Create an instance of the Excel application
-    excel = win32.gencache.EnsureDispatch('Excel.Application')
-
-    # Make Excel visible (optional)
-    excel.Visible = True
-
-    # Open a new workbook
-    workbook = excel.Workbooks.Add()
-
-    # Get the active sheet
-    sheet = workbook.ActiveSheet
-
-    # Split the all_data string into separate lines
-    all_data_lines = all_data.split('\n')
-
-    # Paste each line in a separate row in the first column
-    for i, line in enumerate(all_data_lines):
-        sheet.Cells(i + 1, 1).Value = line
-
-    # Save the workbook with the name 'cprNumber'
-    workbook.SaveAs(cpr_nr)
-
-    # Close the workbook
-    workbook.Close()
-
-    # Quit Excel
-    excel.Quit()
+from master.global_functions import save_data_to_excel
 
 
 def go_one_page_back():
@@ -61,10 +19,10 @@ def go_one_page_back():
     # Release the Ctrl key
     keyboard.release('ctrl')
 
-    time.sleep(4)
+    time.sleep(3)
 
 
-def select_all_columns_and_copy():
+def select_all_columns_then_copy():
     # take a screenshot of the entire screen
     screenshot = pyautogui.screenshot()
 
@@ -78,7 +36,7 @@ def select_all_columns_and_copy():
     gray = cv2.cvtColor(screenshotNP, cv2.COLOR_BGR2GRAY)
 
     # Load the template image
-    template = cv2.imread('07-alle-raekker.jpg', cv2.IMREAD_GRAYSCALE)
+    template = cv2.imread('images/blood_test/01-alle-raekker.jpg', cv2.IMREAD_GRAYSCALE)
 
     # Find the text on the screenshot using template matching
     result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
@@ -111,6 +69,8 @@ def select_all_columns_and_copy():
 
     # # Simulate a right-click at the current mouse position
     pyautogui.rightClick()
+    # Delay the click for 2 second
+    time.sleep(2)
 
     # Move the mouse down by 90 pixels
     pyautogui.move(20, 40)
@@ -118,20 +78,20 @@ def select_all_columns_and_copy():
     # Simulate a left-click at the current mouse position
     pyautogui.click()
 
-    # Delay the click for 1 second
-    time.sleep(1)
+    # Delay the click for 2 second
+    time.sleep(2)
 
 
-def extract_data_from_columns(cpr_nr):
+def extract_blood_test_data_from_columns(cpr_nr):
+    all_data = ''
+
     while True:
-        select_all_columns_and_copy()
+        select_all_columns_then_copy()
 
         # get the copied text from clipboard
-        global copied_text
         copied_text = pyperclip.paste()
 
         # if data already exist that mean we are in the last page
-        global all_data
         if copied_text in all_data:
             break
 
@@ -140,6 +100,4 @@ def extract_data_from_columns(cpr_nr):
 
         go_one_page_back()
 
-    save_data_to_excel(cpr_nr)
-    copied_text = ''
-    all_data = ''
+    save_data_to_excel(cpr_nr, all_data)
