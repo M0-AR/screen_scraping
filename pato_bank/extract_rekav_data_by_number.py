@@ -38,8 +38,8 @@ def select_and_copy_data_from_table():
     # Get the current position of the mouse cursor
     x, _ = pyautogui.position()
 
-    # Get the position of the 04-scroll-down-until-sign-found.jpg image
-    _, y = pyautogui.locateCenterOnScreen('images/pato_bank/04-scroll-down-until-sign-found.jpg', confidence=0.9)
+    # Get the position of the 04-07-scroll-down-until-sign-found.jpg image
+    _, y = pyautogui.locateCenterOnScreen('images/pato_bank/04-07-scroll-down-until-sign-found.jpg', confidence=0.9)
 
     pyautogui.moveTo(x, y, duration=1)
 
@@ -72,7 +72,7 @@ def scroll_most_down():
     # Scroll down until red-line found
     while True:
         # Check if the red line image is on the screen
-        if pyautogui.locateOnScreen('images/pato_bank/04-scroll-down-until-sign-found.jpg', confidence=0.9):
+        if pyautogui.locateOnScreen('images/pato_bank/04-07-scroll-down-until-sign-found.jpg', confidence=0.9):
             break  # exit the loop if the image is found
         else:
             # Scroll down by 100 pixels

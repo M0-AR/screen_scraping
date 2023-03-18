@@ -80,7 +80,7 @@ screenshotNP = np.array(pyautogui.screenshot())
 gray = cv2.cvtColor(screenshotNP, cv2.COLOR_BGR2GRAY)
 
 # Load the template image
-template = cv2.imread('all-result.jpg', cv2.IMREAD_GRAYSCALE)
+template = cv2.imread('02-all-result.jpg', cv2.IMREAD_GRAYSCALE)
 
 # Find the text on the screenshot using template matching
 result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)

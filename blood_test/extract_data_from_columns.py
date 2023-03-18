@@ -82,7 +82,7 @@ def select_all_columns_then_copy():
     time.sleep(2)
 
 
-def extract_blood_test_data_from_columns(cpr_nr):
+def extract_blood_test_data_from_columns():
     all_data = ''
 
     while True:
@@ -100,4 +100,4 @@ def extract_blood_test_data_from_columns(cpr_nr):
 
         go_one_page_back()
 
-    save_data_to_excel(cpr_nr, all_data)
+    return all_data
