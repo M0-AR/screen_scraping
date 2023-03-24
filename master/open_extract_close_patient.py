@@ -42,7 +42,7 @@ def extract_blood_test_data(patient_path):
     from blood_test.extract_data_from_columns import extract_blood_test_data_from_columns
 
     # Extract blood test data
-    click_by_mouse_on('06-laboratoriesvar.jpg')
+    click_by_mouse_on('images/blood_test/02-laboratoriesvar.jpg')
 
     # Delay the click for 5 second
     time.sleep(5)
@@ -51,63 +51,32 @@ def extract_blood_test_data(patient_path):
 
     save_data_to_excel(patient_path, 'blood_test', all_data)
 
-    # Delay the click for 2 second
-    time.sleep(2)
+    # Delay the click for 5 second
+    time.sleep(5)
 
-
-def extract_miba_data(patient_path):
-    from miba.miba import extract_miba_all_data
-
-    # Click on the 'MIBA' button
-    click_by_mouse_on('images/miba/01-miba.jpg')
-
-    # Wait for 1 second
-    time.sleep(1)
-
-    # Click on the 'All results' button
-    click_by_mouse_on('images/miba/02-all-result.jpg')
-
-    # Wait for 1 second
-    time.sleep(1)
-
-    # Click on the 'Select all' button
-    click_by_mouse_on('images/miba/03-select-all.jpg', -50, 0)
-
-    # Wait for 1 second
-    time.sleep(1)
-
-    # Click on the 'Display' button
-    click_by_mouse_on('images/miba/04-display-all-result.jpg')
-
-    # Wait for 1 second
-    time.sleep(1)
-
-    all_data = extract_miba_all_data()
-
-    save_data_to_excel(patient_path, 'miba', all_data)
-
-    # Delay the click for 2 second
-    time.sleep(2)
 
 
 if __name__ == "__main__":
-    # Create a directory named 'hospital_data' in the current working directory
-    root_path = "../hospital_data"
-    create_directory(root_path)
+    # Create a directory named 'HospitalData' in the current working directory
+    root_directory = 'HospitalData'
+    create_directory(root_directory)
+
+    documents_path = os.path.expanduser("~\Documents")
+    root_path = os.path.join(documents_path, root_directory)
 
     cpr_nrs = read_cpr_nr_from_excel()
     for cpr_nr in cpr_nrs:
 
-        # Create a directory named '{patient's cpr-nr}' under 'hospital_data'
-        patient_path = root_path + '/' + cpr_nr
-        create_directory(patient_path)
+        create_directory(cpr_nr, root_path)
+        patient_directory = root_directory + '/' + cpr_nr
+        patient_path = os.path.join(documents_path, patient_directory)
 
         click_by_mouse_on('images/general/01-patientopslag.jpg')
-        # Delay the click for 1 second
+        # Delay the click for 2 second
         time.sleep(2)
 
         input_cpr_nr(cpr_nr, 'images/general/02-navn-or-cprNr.jpg', 250, 0)
-        # Delay the click for 1 second
+        # Delay the click for 2 second
         time.sleep(2)
 
         click_by_mouse_on('images/general/03-find-patient.jpg')
@@ -115,24 +84,25 @@ if __name__ == "__main__":
         time.sleep(3)
 
         click_by_mouse_on('images/general/04-vaelg.jpg')
-        # Delay the click for 1 second
+        # Delay the click for 2 second
         time.sleep(2)
 
         click_by_mouse_on('images/general/05-if-aabn-journal.jpg')
-        # Delay the click for 1 second
+        # Delay the click for 2 second
         time.sleep(4)
 
         #################################################
         # Extract blood test data
-        """
-        extract_blood_test_data(patient_path)
-        """
+        # extract_blood_test_data(patient_path)
         # End of extracting blood test data
         #################################################
 
         #################################################
         # Extract miba data
+
+        from miba.miba import extract_miba_data
         extract_miba_data(patient_path)
+
         # End of extracting miba data
         #################################################
 
@@ -145,6 +115,6 @@ if __name__ == "__main__":
         #################################################
         """
 
-        click_by_mouse_on('images/general/08-close-by-x.jpg', 75, 0)
+        click_by_mouse_on('images/general/08-close-by-x.jpg', 40, 0)
         # Delay the click for 1 second
         time.sleep(1)

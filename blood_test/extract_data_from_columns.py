@@ -67,7 +67,7 @@ def select_all_columns_then_copy():
     # Hold up the left mouse button at the current position
     pyautogui.mouseUp(button='left')
 
-    # # Simulate a right-click at the current mouse position
+    # Simulate a right-click at the current mouse position
     pyautogui.rightClick()
     # Delay the click for 2 second
     time.sleep(2)

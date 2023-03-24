@@ -1,5 +1,4 @@
 import time
-
 import cv2
 import keyboard
 import numpy as np
@@ -7,36 +6,62 @@ import pyautogui
 import pyperclip
 
 
-def click_by_mouse_on(position, move_x=0, move_y=0):
-    # take a screenshot of the entire screen
-    screenshot = pyautogui.screenshot()
+def click_by_mouse_on(
+    position: str,
+    move_x: int = 0,
+    move_y: int = 0,
+    confidence: float = 0.0
+) -> None:
+    """Find an image or text on the screen and perform a mouse click.
 
-    # save the screenshot as a file for to read
-    screenshot.save("screenshot.png")
+    Args:
+        position (str): The image or text to be searched on the screen.
+        move_x (int, optional): The amount to move the mouse cursor on the X-axis
+            after finding the image or text. Defaults to 0.
+        move_y (int, optional): The amount to move the mouse cursor on the Y-axis
+            after finding the image or text. Defaults to 0.
+        confidence (float, optional): The minimum confidence level for the image
+            or text match. If set to 0, the function will use text recognition
+            instead of image matching. Defaults to 0.
 
-    # Load the screenshot
-    screenshotNP = np.array(pyautogui.screenshot())
+    Returns:
+        None: The function does not return a value.
 
-    # Convert to grayscale
-    gray = cv2.cvtColor(screenshotNP, cv2.COLOR_BGR2GRAY)
+    Raises:
+        Exception: If the image or text cannot be located on the screen.
 
-    # Load the template image
-    template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
-
-    # Find the text on the screenshot using template matching
-    result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-    y, x = np.unravel_index(result.argmax(), result.shape)
-
-    # Move the mouse to the desire area
-    x = x + move_x
-    y = y + move_y
-
-    # Click on the center of the text
-    width, height = template.shape[::-1]
-    pyautogui.moveTo(x + width / 2, y + height / 2)
-
-    # Simulate a right-click at the current mouse position
-    pyautogui.click()
+    """
+    if confidence != 0:
+        # Use image matching to find the position on the screen
+        pos = pyautogui.locateCenterOnScreen(position, confidence=confidence)
+        if pos is None:
+            raise Exception("Could not locate the image on the screen")
+        else:
+            x, y = pos
+            pyautogui.moveTo(x + move_x, y + move_y, duration=1)
+            pyautogui.click()
+    else:
+        # Use text recognition to find the position on the screen
+        # Take a screenshot of the entire screen
+        screenshot = pyautogui.screenshot()
+        # Save the screenshot as a file to read
+        screenshot.save("screenshot.png")
+        # Load the screenshot as a NumPy array
+        screenshot_np = np.array(screenshot)
+        # Convert the screenshot to grayscale
+        gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
+        # Load the template image
+        template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
+        # Find the text on the screenshot using template matching
+        result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+        y, x = np.unravel_index(result.argmax(), result.shape)
+        # Move the mouse to the desired position
+        x = x + move_x
+        y = y + move_y
+        pyautogui.moveTo(x, y, duration=1)
+        # Click on the center of the text
+        width, height = template.shape[::-1]
+        pyautogui.click(x + width / 2, y + height / 2)
 
 
 def save_data_to_excel(path, name, data):
@@ -135,18 +160,17 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
 
     # Get the position of the up-right corner image, and move the mouse to that position
     x, y = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.9)
-    pyautogui.moveTo(x, y + move_y, duration=1)
+    pyautogui.moveTo(x + move_x, y + move_y, duration=1)
 
-    # Scroll down to the specified end position (if any)
-    if end_scroll_position:
-        scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
+    # Scroll down to the specified end position
+    scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
 
-        # Get the current position of the mouse cursor
-        x, _ = pyautogui.position()
+    # Get the current position of the mouse cursor
+    x, _ = pyautogui.position()
 
-        # Get the position of the end_scroll image to handle the bottom-most edge case
-        _, y = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.9)
-        pyautogui.moveTo(x, y, duration=1)
+    # Get the position of the end_scroll image to handle the bottom-most edge case
+    _, y = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.9)
+    pyautogui.moveTo(x, y + 100, duration=1)
 
     # Release the left mouse button
     pyautogui.mouseUp(button='left')
@@ -158,10 +182,11 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     table_data = pyperclip.paste()
     return table_data
 
-def create_directory(directory_name):
+
+def create_directory(directory_name, directory_path='~/Documents'):
     import os
 
-    documents_path = os.path.expanduser("~/Documents")
+    documents_path = os.path.expanduser(directory_path)
     directory_path = os.path.join(documents_path, directory_name)
 
     if not os.path.exists(directory_path):
