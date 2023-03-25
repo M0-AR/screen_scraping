@@ -8,7 +8,7 @@ import time
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())
@@ -71,7 +71,7 @@ time.sleep(1)
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())
@@ -102,7 +102,7 @@ time.sleep(4)
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())
@@ -157,7 +157,7 @@ time.sleep(1)
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())
@@ -180,7 +180,7 @@ pyautogui.moveTo(x + width / 2, y + height / 2)
 # to the right until a certain sign is found in the current screenshot
 
 # Load the screenshot as an image
-screenshot = cv2.imread('screenshot.png')
+screenshot = cv2.imread('number.png')
 
 # Load the template image of the sign to search for
 sign_template = cv2.imread('scroll-bar-bottom-right.jpg')
@@ -218,7 +218,7 @@ import cv2
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())

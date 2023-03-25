@@ -6,10 +6,10 @@
 # screenshot = pyautogui.screenshot()
 #
 # # save the screenshot as a file for pytesseract to read
-# screenshot.save("screenshot.png")
+# screenshot.save("number.png")
 #
 # # read the text from the screenshot using pytesseract
-# text = pytesseract.image_to_string(Image.open("screenshot.png"))
+# text = pytesseract.image_to_string(Image.open("number.png"))
 #
 # # search for the word "example text" in the text extracted from the screenshot
 # if "example text" in text:
@@ -41,7 +41,7 @@
 # screenshot = pyautogui.screenshot()
 #
 # # save the screenshot as a file for to read
-# screenshot.save("screenshot.png")
+# screenshot.save("number.png")
 #
 # # Load the screenshot
 # screenshotNP = np.array(pyautogui.screenshot())

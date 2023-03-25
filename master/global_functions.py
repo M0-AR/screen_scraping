@@ -45,7 +45,7 @@ def click_by_mouse_on(
         # Take a screenshot of the entire screen
         screenshot = pyautogui.screenshot()
         # Save the screenshot as a file to read
-        screenshot.save("screenshot.png")
+        screenshot.save("number.png")
         # Load the screenshot as a NumPy array
         screenshot_np = np.array(screenshot)
         # Convert the screenshot to grayscale

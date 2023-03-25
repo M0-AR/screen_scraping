@@ -8,7 +8,7 @@ import cv2
 screenshot = pyautogui.screenshot()
 
 # save the screenshot as a file for to read
-screenshot.save("screenshot.png")
+screenshot.save("number.png")
 
 # Load the screenshot
 screenshotNP = np.array(pyautogui.screenshot())
