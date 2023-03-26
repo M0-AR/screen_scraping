@@ -150,7 +150,7 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     """
 
     # Move the mouse to the up-left corner image and click it
-    click_by_mouse_on(up_left_corner_position)
+    click_by_mouse_on(up_left_corner_position, move_x, move_y, confidence=0.9)
 
     # Wait for 1 second
     time.sleep(1)
@@ -170,7 +170,7 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
 
     # Get the position of the end_scroll image to handle the bottom-most edge case
     _, y = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.9)
-    pyautogui.moveTo(x, y + 100, duration=1)
+    pyautogui.moveTo(x, y, duration=1)
 
     # Release the left mouse button
     pyautogui.mouseUp(button='left')
