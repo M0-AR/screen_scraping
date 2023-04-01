@@ -55,7 +55,6 @@ def extract_blood_test_data(patient_path):
     time.sleep(5)
 
 
-
 if __name__ == "__main__":
     # Create a directory named 'HospitalData' in the current working directory
     root_directory = 'HospitalData'
@@ -66,7 +65,6 @@ if __name__ == "__main__":
 
     cpr_nrs = read_cpr_nr_from_excel()
     for cpr_nr in cpr_nrs:
-
         create_directory(cpr_nr, root_path)
         patient_directory = root_directory + '/' + cpr_nr
         patient_path = os.path.join(documents_path, patient_directory)
@@ -99,13 +97,19 @@ if __name__ == "__main__":
 
         #################################################
         # Extract miba data
-
         from miba.miba import extract_miba_data
-        extract_miba_data(patient_path)
 
+        # extract_miba_data(patient_path)
         # End of extracting miba data
         #################################################
 
+        #################################################
+        # Extract pato_bank data
+        from pato_bank.extract_rekav_data_by_number import extract_pato_bank_data
+
+        extract_pato_bank_data(patient_path)
+        # End of extracting pato_bank data
+        #################################################
         """
         #################################################
         click_by_mouse_on('images/pato_bank/01-patobank.jpg')
