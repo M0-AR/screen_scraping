@@ -109,9 +109,9 @@ if __name__ == "__main__":
 
         #################################################
         # Extract pato_bank data
-        from pato_bank.extract_rekav_data_by_number import extract_pato_bank_data
+        from pato_bank.extract_rekav_data_by_number import main_extract_pato_bank_data
 
-        extract_pato_bank_data(patient_path)
+        main_extract_pato_bank_data(patient_path)
         # End of extracting pato_bank data
         #################################################
 
