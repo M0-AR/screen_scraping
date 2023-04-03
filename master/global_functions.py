@@ -7,10 +7,10 @@ import pyperclip
 
 
 def click_by_mouse_on(
-    position: str,
-    move_x: int = 0,
-    move_y: int = 0,
-    confidence: float = 0.0
+        position: str,
+        move_x: int = 0,
+        move_y: int = 0,
+        confidence: float = 0.0
 ) -> None:
     """Find an image or text on the screen and perform a mouse click.
 
@@ -44,8 +44,6 @@ def click_by_mouse_on(
         # Use text recognition to find the position on the screen
         # Take a screenshot of the entire screen
         screenshot = pyautogui.screenshot()
-        # Save the screenshot as a file to read
-        screenshot.save("number.png")
         # Load the screenshot as a NumPy array
         screenshot_np = np.array(screenshot)
         # Convert the screenshot to grayscale
@@ -106,15 +104,51 @@ def save_data_to_excel(path, name, data):
     excel.Quit()
 
 
+import cv2
+import numpy as np
+import pyautogui
+
+
+def detect_scrollbar(scrollbar_template):
+    # Load the template image
+    template = cv2.imread(scrollbar_template, cv2.IMREAD_GRAYSCALE)
+
+    # Check if the scrollbar template image is valid
+    if template is None or template.size == 0:
+        raise Exception("Error: The scrollbar template image could not be loaded. Please check the file path and "
+                        "format.")
+
+    # Take a screenshot
+    screenshot = pyautogui.screenshot()
+
+    # Load the screenshot
+    screenshotNP = np.array(screenshot)
+
+    # Convert to grayscale
+    gray = cv2.cvtColor(screenshotNP, cv2.COLOR_BGR2GRAY)
+
+    # Calculate the match between the images
+    result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+
+    # Calculate the maximum value (confidence)
+    max_val = result.max()
+
+    # Set a threshold to consider the template as found
+    threshold = 0.5
+
+    return max_val >= threshold
+
+
 def scroll_down_most(end_scroll, scroll_down_by_x_pixels):
-    # Scroll down until red-line found
-    while True:
-        # Check if the red line image is on the screen
-        if pyautogui.locateOnScreen(end_scroll, confidence=0.9):
-            break  # exit the loop if the image is found
-        else:
-            # Scroll down by 'scroll_down_by' pixels
-            pyautogui.scroll(-scroll_down_by_x_pixels)
+    if detect_scrollbar('images/general/scroll-bar-pato-bank.jpg'):
+        # Scroll down until red-line found
+        while True:
+            # Check if the red line image is on the screen
+            if pyautogui.locateOnScreen(end_scroll, confidence=0.8):
+                break  # exit the loop if the image is found
+            else:
+                # Scroll down by 'scroll_down_by' pixels
+                pyautogui.scroll(-scroll_down_by_x_pixels)
 
 
 def press_ctrl_c():
@@ -159,8 +193,15 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     pyautogui.mouseDown(button='left')
 
     # Get the position of the up-right corner image, and move the mouse to that position
-    x, y = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.9)
-    pyautogui.moveTo(x + move_x, y + move_y, duration=1)
+    result = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.9)
+    x, y = 0, 0
+    if result is not None:
+        x, y = result
+        pyautogui.moveTo(x + move_x, y + move_y, duration=1)
+    else:
+        # Handle no scroll-bar case
+        x, y = pyautogui.locateCenterOnScreen('images/pato_bank/07-temp-top-right-selection-rekv-nr.jpg', confidence=0.8)
+        pyautogui.moveTo(x + move_x, y + move_y, duration=1)
 
     # Scroll down to the specified end position
     scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
@@ -169,8 +210,15 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     x, _ = pyautogui.position()
 
     # Get the position of the end_scroll image to handle the bottom-most edge case
-    _, y = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.9)
-    pyautogui.moveTo(x, y, duration=1)
+    result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.8)
+    if result is not None:
+        _, y = result
+        # 50 to not go beyond the red line
+        pyautogui.moveTo(x, y - 50, duration=1)
+    else:
+        # Handle the case where there is only one rekv.nr in the PatoBank page
+        pyautogui.moveTo(x, y + 900, duration=1)
+
 
     # Release the left mouse button
     pyautogui.mouseUp(button='left')

@@ -270,9 +270,6 @@ def extract_pato_bank_data(path_to_save):
     # # Write the DataFrame to an Excel file
     df.to_excel('file1.xlsx', index=False)
 
-    # documents_path = os.path.expanduser("~\Documents")
-    # save_data_to_excel(documents_path, 'pato_bank_text', pato_bank_text)
-
     rekv_nrs = extract_rekv_numbers(pato_bank_text)
     sorted_rekv_nrs = sort_numbers_by_text_order(rekv_nrs, pato_bank_text)
 
@@ -309,7 +306,7 @@ def extract_pato_bank_data(path_to_save):
                     time.sleep(2)
                     rekv_number_data = select_and_copy_data_from_table(
                         up_left_corner_position='images/pato_bank/06-top_left_selection-rekv-nr.jpg',
-                        up_right_corner_position='images/pato_bank/07-top_right_selection-rekv-nr.jpg',
+                        up_right_corner_position='images/pato_bank/07-top-right-selection-rekv-nr.jpg',
                         end_scroll_position='images/pato_bank/08-end-of-scroll-rekv-nr.jpg')
 
                     # Add the extracted sections as a new row in the DataFrame
@@ -351,8 +348,14 @@ def extract_pato_bank_data(path_to_save):
         empty_rows = df[column].isna().sum()  # Count empty rows
         df[column] = pd.concat([non_empty_rows, pd.Series([pd.NA] * empty_rows, dtype='object')], ignore_index=True)
 
-    # Delete all the data after row 11
-    df = df.iloc[:11]  # TODO len(sorted_rekv_nrs) - 1
+    # Delete all noisy data
+    df = df.iloc[:len(sorted_rekv_nrs)]
+
+    # Replace all instances of _x000D_ with a space in all cells of the dataframe df
+    df = df.replace('_x000D_', ' ', regex=True)
 
     # Write the modified DataFrame to a new Excel file
     df.to_excel(path_to_save + '/pato_bank.xlsx', index=False)
+
+
+extract_pato_bank_data('.')

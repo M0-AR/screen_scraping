@@ -91,17 +91,21 @@ if __name__ == "__main__":
 
         #################################################
         # Extract blood test data
-        # extract_blood_test_data(patient_path)
+        extract_blood_test_data(patient_path)
         # End of extracting blood test data
         #################################################
+
+        time.sleep(2)
 
         #################################################
         # Extract miba data
         from miba.miba import extract_miba_data
 
-        # extract_miba_data(patient_path)
+        extract_miba_data(patient_path)
         # End of extracting miba data
         #################################################
+
+        time.sleep(2)
 
         #################################################
         # Extract pato_bank data
@@ -110,14 +114,8 @@ if __name__ == "__main__":
         extract_pato_bank_data(patient_path)
         # End of extracting pato_bank data
         #################################################
-        """
-        #################################################
-        click_by_mouse_on('images/pato_bank/01-patobank.jpg')
-        # Delay the click for 1 second
-        time.sleep(2)
 
-        #################################################
-        """
+        time.sleep(2)
 
         click_by_mouse_on('images/general/08-close-by-x.jpg', 40, 0)
         # Delay the click for 1 second
