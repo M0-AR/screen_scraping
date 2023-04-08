@@ -9,10 +9,10 @@ from PIL import ImageGrab
 import win32api
 from typing import Tuple
 
-from master.global_functions import click_by_mouse_on, select_and_copy_data_from_table
+from master.global_functions import click_by_mouse_on, select_and_copy_data_from_table, write_dataframe_to_excel
 
 # Set the path to the Tesseract OCR engine executable
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 # Update the path if necessary
 
 REKV_NUM_PATTERNS = [
@@ -314,16 +314,6 @@ def remove_existing_file(file_path):
         os.remove(file_path)
 
 
-def write_dataframe_to_excel(df, file_path, index=False):
-    """
-    Write the DataFrame to an Excel file.
-
-    Args:
-        df (pd.DataFrame): DataFrame to be written to the Excel file.
-        file_path (str): The path to the file where the DataFrame should be written.
-        index (bool, optional): Whether to write row names (index). Defaults to False.
-    """
-    df.to_excel(file_path, index=index)
 
 
 def extract_and_sort_rekv_numbers(text):
@@ -393,7 +383,9 @@ def handle_rekv_number(target_number, cursor_pos, screenshot, screenshot_coords)
             rekv_number_data = select_and_copy_data_from_table(
                 up_left_corner_position='images/pato_bank/06-top_left_selection-rekv-nr.jpg',
                 up_right_corner_position='images/pato_bank/07-top-right-selection-rekv-nr.jpg',
-                end_scroll_position='images/pato_bank/08-end-of-scroll-rekv-nr.jpg'
+                end_scroll_position='images/pato_bank/08-end-of-scroll-rekv-nr.jpg',
+                confidence=0.8,
+                move_y_end_scroll=50
             )
 
             # Extract data as a new row in the DataFrame

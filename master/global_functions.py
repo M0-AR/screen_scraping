@@ -6,6 +6,47 @@ import pyautogui
 import pyperclip
 
 
+def move_mouse_on(
+        position: str,
+        move_x: int = 0,
+        move_y: int = 0,
+) -> None:
+    """Find an image or text on the screen and move a mouse
+
+    Args:
+        position (str): The image or text to be searched on the screen.
+        move_x (int, optional): The amount to move the mouse cursor on the X-axis
+            after finding the image or text. Defaults to 0.
+        move_y (int, optional): The amount to move the mouse cursor on the Y-axis
+            after finding the image or text. Defaults to 0.
+
+    Returns:
+        None: The function does not return a value.
+
+    Raises:
+        Exception: If the image or text cannot be located on the screen.
+
+    """
+    # Take a screenshot of the entire screen
+    screenshot = pyautogui.screenshot()
+    # Load the screenshot as a NumPy array
+    screenshot_np = np.array(screenshot)
+    # Convert the screenshot to grayscale
+    gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
+    # Load the template image
+    template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
+    # Find the text on the screenshot using template matching
+    result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+    y, x = np.unravel_index(result.argmax(), result.shape)
+    # Move the mouse to the desired position
+    x = x + move_x
+    y = y + move_y
+    pyautogui.moveTo(x, y, duration=1)
+    # Click on the center of the text
+    width, height = template.shape[::-1]
+    pyautogui.moveTo(x + width / 2, y + height / 2)
+
+
 def click_by_mouse_on(
         position: str,
         move_x: int = 0,
@@ -62,6 +103,17 @@ def click_by_mouse_on(
         pyautogui.click(x + width / 2, y + height / 2)
 
 
+def write_dataframe_to_excel(df, file_path, index=False):
+    """
+    Write the DataFrame to an Excel file.
+
+    Args:
+        df (pd.DataFrame): DataFrame to be written to the Excel file.
+        file_path (str): The path to the file where the DataFrame should be written.
+        index (bool, optional): Whether to write row names (index). Defaults to False.
+    """
+    df.to_excel(file_path, index=index)
+
 def save_data_to_excel(path, name, data):
     import os
     import shutil
@@ -94,7 +146,6 @@ def save_data_to_excel(path, name, data):
 
     # Save the workbook with the given file name in the specified path
     file_path = os.path.join(path, name + '.xlsx')
-    print(file_path)
     workbook.SaveAs(file_path)
 
     # Close the workbook
@@ -140,15 +191,14 @@ def detect_scrollbar(scrollbar_template):
 
 
 def scroll_down_most(end_scroll, scroll_down_by_x_pixels):
-    if detect_scrollbar('images/general/scroll-bar-pato-bank.jpg'):
-        # Scroll down until red-line found
-        while True:
-            # Check if the red line image is on the screen
-            if pyautogui.locateOnScreen(end_scroll, confidence=0.8):
-                break  # exit the loop if the image is found
-            else:
-                # Scroll down by 'scroll_down_by' pixels
-                pyautogui.scroll(-scroll_down_by_x_pixels)
+    # Scroll down until red-line found
+    while True:
+        # Check if the red line image is on the screen
+        if pyautogui.locateOnScreen(end_scroll, confidence=0.8):
+            break  # exit the loop if the image is found
+        else:
+            # Scroll down by 'scroll_down_by' pixels
+            pyautogui.scroll(-scroll_down_by_x_pixels)
 
 
 def press_ctrl_c():
@@ -166,8 +216,8 @@ def press_ctrl_c():
     time.sleep(1)
 
 
-def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position,
-                                    scroll_down_by_x_pixels=250, move_x=0, move_y=0):
+def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position, confidence,
+                                    scroll_if_sign_found=None, scroll_down_by_x_pixels=250, move_x=0, move_y=0, move_y_end_scroll=0):
     """
     Extract data from a table within an application window.
 
@@ -200,25 +250,28 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
         pyautogui.moveTo(x + move_x, y + move_y, duration=1)
     else:
         # Handle no scroll-bar case
-        x, y = pyautogui.locateCenterOnScreen('images/pato_bank/07-temp-top-right-selection-rekv-nr.jpg', confidence=0.8)
+        x, y = pyautogui.locateCenterOnScreen('images/pato_bank/07-temp-top-right-selection-rekv-nr.jpg',
+                                              confidence=0.8)
         pyautogui.moveTo(x + move_x, y + move_y, duration=1)
 
-    # Scroll down to the specified end position
-    scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
+    if scroll_if_sign_found:
+        if detect_scrollbar('images/general/scroll-bar-pato-bank.jpg'): # TODO: use scroll_if_sign_found = images/general/scroll-bar-pato-bank.jpg
+            # Scroll down to the specified end position
+            scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
 
     # Get the current position of the mouse cursor
     x, _ = pyautogui.position()
 
     # Get the position of the end_scroll image to handle the bottom-most edge case
-    result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.8)
+    # result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.8)
+    result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=confidence)
     if result is not None:
         _, y = result
         # 50 to not go beyond the red line
-        pyautogui.moveTo(x, y - 50, duration=1)
+        pyautogui.moveTo(x, y - move_y_end_scroll, duration=1)
     else:
         # Handle the case where there is only one rekv.nr in the PatoBank page
         pyautogui.moveTo(x, y + 900, duration=1)
-
 
     # Release the left mouse button
     pyautogui.mouseUp(button='left')

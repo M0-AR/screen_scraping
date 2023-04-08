@@ -1,2 +1,0 @@
-# Provide some documentation about your project, and some help for new developers on how to contribute
-#

@@ -1,5 +1,6 @@
 import os
 import time
+
 from global_functions import click_by_mouse_on, save_data_to_excel, create_directory
 
 
@@ -113,6 +114,16 @@ if __name__ == "__main__":
 
         main_extract_pato_bank_data(patient_path)
         # End of extracting pato_bank data
+        #################################################
+
+        time.sleep(2)
+
+        #################################################
+        # Extract diagnose_list data
+        from diagnose_liste.diagnose_list import main_extract_diagnose_list_data
+
+        main_extract_diagnose_list_data(patient_path)
+        # End of extracting diagnose_list data
         #################################################
 
         time.sleep(2)
