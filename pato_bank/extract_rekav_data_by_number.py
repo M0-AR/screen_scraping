@@ -11,10 +11,6 @@ from typing import Tuple
 
 from master.global_functions import click_by_mouse_on, select_and_copy_data_from_table, write_dataframe_to_excel
 
-# Set the path to the Tesseract OCR engine executable
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-# Update the path if necessary
-
 REKV_NUM_PATTERNS = [
     r'\b[0-9]{8}\b',
     r'\b[0-9]{2}[a-zA-Z]{2}[0-9]{4}\b',
@@ -286,7 +282,10 @@ def extract_table_text():
         up_left_corner_position='images/pato_bank/02-cgi-logo.jpg',
         up_right_corner_position='images/pato_bank/03-end-of-selection.jpg',
         end_scroll_position='images/pato_bank/04-scroll-down-until-sign-found.jpg',
-        move_y=300
+        scroll_if_sign_found='images/general/scroll-bar-pato-bank.jpg',
+        confidence_of_end_scroll=0.8,
+        move_y=300,
+        move_y_end_scroll=50
     )
 
 
@@ -384,7 +383,8 @@ def handle_rekv_number(target_number, cursor_pos, screenshot, screenshot_coords)
                 up_left_corner_position='images/pato_bank/06-top_left_selection-rekv-nr.jpg',
                 up_right_corner_position='images/pato_bank/07-top-right-selection-rekv-nr.jpg',
                 end_scroll_position='images/pato_bank/08-end-of-scroll-rekv-nr.jpg',
-                confidence=0.8,
+                scroll_if_sign_found='images/general/scroll-bar-pato-bank.jpg',
+                confidence_of_end_scroll=0.8,
                 move_y_end_scroll=50
             )
 
@@ -443,6 +443,10 @@ def main_extract_pato_bank_data(path_to_save):
     Args:
     path_to_save (str): The path to the directory where the resulting Excel file should be saved.
     """
+
+    # Set the path to the Tesseract OCR engine executable
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    # Update the path if necessary
 
     click_pato_bank()
     pato_bank_text = extract_table_text()

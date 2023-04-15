@@ -2,7 +2,8 @@ import os
 import time
 import pandas as pd
 from master.global_functions import move_mouse_on, select_and_copy_data_from_table, save_data_to_excel, \
-    write_dataframe_to_excel
+    write_dataframe_to_excel, click_by_mouse_on
+
 
 def extract_table_data():
     """
@@ -12,10 +13,10 @@ def extract_table_data():
     :rtype: str
     """
     return select_and_copy_data_from_table('images/diagnose_list/02-top-left-corner.jpg',
-                                            'images/diagnose_list/03-top-right-corner.jpg',
-                                            'images/diagnose_list/04-bottom-right-corner.jpg',
-                                            confidence=0.95,
-                                            move_x=25)
+                                           'images/diagnose_list/03-top-right-corner.jpg',
+                                           'images/diagnose_list/04-bottom-right-corner.jpg',
+                                           confidence_of_end_scroll=0.95,
+                                           move_x=25)
 
 
 def split_table_data_into_rows(table_data):
@@ -73,8 +74,11 @@ def main_extract_diagnose_list_data(path_to_save):
     :param path_to_save: The path to the directory where the resulting Excel file should be saved.
     :type path_to_save: str
     """
+    click_by_mouse_on('images/diagnose_list/00-scroll-down.jpg', confidence=0.8)
+    time.sleep(3)
+
     move_mouse_on('images/diagnose_list/01-diagnoseoverblik.jpg')
-    time.sleep(2)
+    time.sleep(3)
 
     table_data = extract_table_data()
     rows = split_table_data_into_rows(table_data)
@@ -83,5 +87,3 @@ def main_extract_diagnose_list_data(path_to_save):
     df = create_dataframe_from_pairs(pairs)
 
     write_dataframe_to_excel(df, os.path.join(path_to_save, 'ambulant_diagnose_list.xlsx'))
-
-

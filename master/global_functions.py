@@ -76,7 +76,7 @@ def click_by_mouse_on(
         # Use image matching to find the position on the screen
         pos = pyautogui.locateCenterOnScreen(position, confidence=confidence)
         if pos is None:
-            raise Exception("Could not locate the image on the screen")
+            print(f"Could not locate {position} image on the screen")
         else:
             x, y = pos
             pyautogui.moveTo(x + move_x, y + move_y, duration=1)
@@ -216,7 +216,7 @@ def press_ctrl_c():
     time.sleep(1)
 
 
-def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position, confidence,
+def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position, confidence_of_end_scroll,
                                     scroll_if_sign_found=None, scroll_down_by_x_pixels=250, move_x=0, move_y=0, move_y_end_scroll=0):
     """
     Extract data from a table within an application window.
@@ -242,6 +242,7 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     # Click and hold the left mouse button
     pyautogui.mouseDown(button='left')
 
+    print(up_right_corner_position)
     # Get the position of the up-right corner image, and move the mouse to that position
     result = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.9)
     x, y = 0, 0
@@ -255,7 +256,7 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
         pyautogui.moveTo(x + move_x, y + move_y, duration=1)
 
     if scroll_if_sign_found:
-        if detect_scrollbar('images/general/scroll-bar-pato-bank.jpg'): # TODO: use scroll_if_sign_found = images/general/scroll-bar-pato-bank.jpg
+        if detect_scrollbar(scroll_if_sign_found):
             # Scroll down to the specified end position
             scroll_down_most(end_scroll_position, scroll_down_by_x_pixels)
 
@@ -264,7 +265,7 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
 
     # Get the position of the end_scroll image to handle the bottom-most edge case
     # result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=0.8)
-    result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=confidence)
+    result = pyautogui.locateCenterOnScreen(end_scroll_position, confidence=confidence_of_end_scroll)
     if result is not None:
         _, y = result
         # 50 to not go beyond the red line
