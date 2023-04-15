@@ -114,7 +114,25 @@ def write_dataframe_to_excel(df, file_path, index=False):
     """
     df.to_excel(file_path, index=index)
 
-def save_data_to_excel(path, name, data):
+
+def bring_window_to_front(window_title):
+    import win32gui
+    """
+    Brings a window with the specified title to the front.
+
+    Args:
+        window_title (str): The title of the window to bring to the front.
+    """
+
+    # Find the window with the specified title
+    window_handle = win32gui.FindWindow(None, window_title)
+
+    # If the window is found, bring it to the front
+    if window_handle:
+        win32gui.SetForegroundWindow(window_handle)
+
+
+def save_data_to_excel(path, name, data, simulate_ctrl_v=False):
     import os
     import shutil
     import win32com.client as win32
@@ -136,13 +154,37 @@ def save_data_to_excel(path, name, data):
 
     # Get the active sheet
     sheet = workbook.ActiveSheet
+    # Wait for a moment
+    time.sleep(2)
 
-    # Split the all_data string into separate lines
-    data_lines = data.split('\n')
+    if simulate_ctrl_v:
+        # Select the first cell
+        sheet.Cells(1, 1).Select()
 
-    # Paste each line in a separate row in the first column
-    for i, line in enumerate(data_lines):
-        sheet.Cells(i + 1, 1).Value = line
+        # Wait for a moment before simulating the keyboard action
+        time.sleep(1)
+
+        # Get the Excel window title
+        excel_window_title = excel.Caption
+
+        # Bring the Excel window to the front
+        bring_window_to_front(excel_window_title)
+
+        # Wait for a moment
+        time.sleep(1)
+
+        # Copy the data's content to the clipboard
+        pyperclip.copy(data)
+
+        # Simulate pressing 'Ctrl+V'
+        press_ctrl_v()
+    else:
+        # Split the all_data string into separate lines
+        data_lines = data.split('\n')
+
+        # Paste each line in a separate row in the first column
+        for i, line in enumerate(data_lines):
+            sheet.Cells(i + 1, 1).Value = line
 
     # Save the workbook with the given file name in the specified path
     file_path = os.path.join(path, name + '.xlsx')
@@ -216,8 +258,25 @@ def press_ctrl_c():
     time.sleep(1)
 
 
-def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position, confidence_of_end_scroll,
-                                    scroll_if_sign_found=None, scroll_down_by_x_pixels=250, move_x=0, move_y=0, move_y_end_scroll=0):
+def press_ctrl_v():
+    # Press and hold the Ctrl key
+    keyboard.press('ctrl')
+
+    # Press and release the V key
+    keyboard.press('v')
+    keyboard.release('v')
+
+    # Release the Ctrl key
+    keyboard.release('ctrl')
+
+    # Delay for 1 second
+    time.sleep(1)
+
+
+def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position,
+                                    confidence_of_end_scroll,
+                                    scroll_if_sign_found=None, scroll_down_by_x_pixels=250, move_x=0, move_y=0,
+                                    move_y_end_scroll=0):
     """
     Extract data from a table within an application window.
 

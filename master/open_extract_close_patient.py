@@ -138,6 +138,16 @@ if __name__ == "__main__":
 
         time.sleep(2)
 
+        #################################################
+        # Extract medicin data
+        from medicin.medicin import main_extract_medicin_data
+
+        main_extract_medicin_data(patient_path)
+        # End of extracting medicin data
+        #################################################
+
+        time.sleep(2)
+
         click_by_mouse_on('images/general/08-close-by-x.jpg', 40, 0)
         # Delay the click for 1 second
         time.sleep(1)
