@@ -43,7 +43,11 @@ def main_extract_medicin_data(path_to_save):
 
     # Click on the seventh image and wait for 15 seconds
     click_by_mouse_on('images/medicin/07-copy-all.jpg', confidence=0.90)
-    time.sleep(15)
+    time.sleep(10)
+
+    # # Click on the sixth image and wait for 1 second
+    # click_by_mouse_on('images/medicin/08-close.jpg', confidence=0.90)
+    # time.sleep(2)
 
     # Get the text from the clipboard and save it to an Excel file
     medicin_data = pyperclip.paste()

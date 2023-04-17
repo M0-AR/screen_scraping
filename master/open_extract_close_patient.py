@@ -137,6 +137,8 @@ if __name__ == "__main__":
         #################################################
 
         time.sleep(2)
+        click_by_mouse_on('images/general/06-vis-journal.jpg')
+        time.sleep(2)
 
         #################################################
         # Extract medicin data
@@ -150,4 +152,4 @@ if __name__ == "__main__":
 
         click_by_mouse_on('images/general/08-close-by-x.jpg', 40, 0)
         # Delay the click for 1 second
-        time.sleep(1)
+        time.sleep(2)
