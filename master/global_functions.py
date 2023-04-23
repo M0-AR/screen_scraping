@@ -5,6 +5,76 @@ import numpy as np
 import pyautogui
 import pyperclip
 
+import pyperclip
+import keyboard
+
+import os
+import shutil
+
+
+def move_file(source_path: str, destination_path: str) -> None:
+    """
+    Move a file from the source path to the destination path.
+
+    :param source_path: A string representing the path to the source file.
+    :param destination_path: A string representing the path to the destination directory or file.
+    :raises TypeError: If the input parameters are not strings.
+    :raises ValueError: If either the source path or destination path is invalid or empty.
+    """
+    # Validate input parameters
+    if not isinstance(source_path, str) or not isinstance(destination_path, str):
+        raise TypeError("Both the source_path and destination_path parameters must be strings.")
+
+    if not os.path.exists(source_path):
+        raise ValueError(f"The source path '{source_path}' does not exist.")
+
+    if not destination_path or not os.path.exists(os.path.dirname(destination_path)):
+        raise ValueError(f"The destination path '{destination_path}' is invalid or empty.")
+
+    # Move the file to the destination path
+    try:
+        shutil.move(source_path, destination_path)
+    except Exception as e:
+        raise ValueError(f"Failed to move file from '{source_path}' to '{destination_path}': {e}")
+
+    return None
+
+
+def input_text_in_field(text: str, image_path: str, x: int, y: int) -> None:
+    """
+    Inputs a text into a designated field on a GUI.
+
+    :param text: A string of text.
+    :param image_path: A string containing the file path of the GUI element to click.
+    :param x: An integer representing the x-coordinate of the click location on the GUI element.
+    :param y: An integer representing the y-coordinate of the click location on the GUI element.
+    :raises TypeError: If the input parameters are of the incorrect type.
+    :raises ValueError: If the cpr_number parameter is not a 10-digit string.
+    """
+    # Validate input parameters
+    if not isinstance(text, str):
+        raise TypeError("text parameter must be a string.")
+
+    if not isinstance(image_path, str):
+        raise TypeError("image_path parameter must be a string.")
+
+    if not isinstance(x, int) or not isinstance(y, int):
+        raise TypeError("x and y parameters must be integers.")
+
+    # Click on the GUI element
+    click_by_mouse_on(image_path, x, y)
+
+    # Copy the CPR number to the clipboard
+    pyperclip.copy(text)
+
+    # Paste the CPR number from the clipboard using keyboard shortcuts
+    try:
+        keyboard.press_and_release('ctrl+v')
+    except keyboard.KeyboardError:
+        print("Error: Could not paste CPR number using keyboard shortcuts.")
+
+    return None
+
 
 def move_mouse_on(
         position: str,

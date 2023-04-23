@@ -1,19 +1,36 @@
 import os
 import time
+import pandas as pd
 
 from global_functions import click_by_mouse_on, save_data_to_excel, create_directory
 
 
-def read_cpr_nr_from_excel():
-    import pandas as pd
+def read_cpr_nr_from_excel(file_path: str) -> list:
+    """
+    Reads CPR numbers from an Excel file and returns them as a list of strings.
 
-    # Read the excel file
-    df = pd.read_excel('cprs.xlsx')
+    :param file_path: A string representing the path to the Excel file containing the CPR numbers.
+    :return: A list of strings representing the CPR numbers.
+    :raises TypeError: If the file_path parameter is not a string.
+    :raises ValueError: If the file_path parameter is an invalid or empty path, or if the Excel file cannot be read.
+    """
+    # Validate input parameter
+    if not isinstance(file_path, str):
+        raise TypeError("The file_path parameter must be a string.")
 
-    # Extract the second column without the first column
-    cprs = df.iloc[:, 0].values
+    if not file_path or not os.path.exists(file_path):
+        raise ValueError(f"The file path '{file_path}' is invalid or empty.")
 
-    return cprs
+    try:
+        # Read the Excel file
+        df = pd.read_excel(file_path)
+
+        # Extract the second column without the first column
+        cprs = df.iloc[:, 0].values.tolist()
+
+        return cprs
+    except Exception as e:
+        raise ValueError(f"Failed to read CPR numbers from Excel file '{file_path}': {e}")
 
 
 def input_cpr_nr(cpr_nr, image, x, y):
@@ -35,25 +52,38 @@ def input_cpr_nr(cpr_nr, image, x, y):
     keyboard.release('ctrl')
 
 
-def extract_blood_test_data(patient_path):
+def extract_blood_test_data(path_to_save_data: str) -> None:
     """
     Extracts blood test data from a patient's record and saves it to an Excel file.
-    """
 
+    :param path_to_save_data: A string representing the path to the patient directory where the blood test data will be saved.
+    :raises TypeError: If the patient_path parameter is not a string.
+    :raises ValueError: If the patient_path parameter is an invalid or empty path, or if there is an error extracting or saving the blood test data.
+    """
     from blood_test.extract_data_from_columns import extract_blood_test_data_from_columns
 
-    # Extract blood test data
-    click_by_mouse_on('images/blood_test/02-laboratoriesvar.jpg')
+    # Validate input parameter
+    if not isinstance(path_to_save_data, str):
+        raise TypeError("The patient_path parameter must be a string.")
 
-    # Delay the click for 5 second
-    time.sleep(5)
+    if not path_to_save_data or not os.path.exists(path_to_save_data):
+        raise ValueError(f"The patient path '{path_to_save_data}' is invalid or empty.")
 
-    all_data = extract_blood_test_data_from_columns()
+    try:
+        # Extract blood test data
+        click_by_mouse_on('images/blood_test/02-laboratoriesvar.jpg')
 
-    save_data_to_excel(patient_path, 'blood_test', all_data)
+        # Delay the click for 5 seconds
+        time.sleep(5)
 
-    # Delay the click for 5 second
-    time.sleep(5)
+        all_data = extract_blood_test_data_from_columns()
+
+        save_data_to_excel(path_to_save_data, 'blood_test', all_data)
+
+        # Delay the click for 5 seconds
+        time.sleep(5)
+    except Exception as e:
+        print(f"Failed to extract blood test data: {e} {path_to_save_data}")
 
 
 if __name__ == "__main__":
@@ -139,6 +169,16 @@ if __name__ == "__main__":
         time.sleep(2)
         click_by_mouse_on('images/general/06-vis-journal.jpg')
         time.sleep(2)
+
+        #################################################
+        # Extract notater data
+        from notater.notater import main_extract_notater_data
+
+        main_extract_notater_data(patient_path)
+        # End of extracting notater data
+        #################################################
+
+        time.sleep(4)
 
         #################################################
         # Extract medicin data

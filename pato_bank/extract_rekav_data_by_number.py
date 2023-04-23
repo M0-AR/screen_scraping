@@ -437,53 +437,72 @@ def clean_and_organize_dataframe(df, rekv_nrs):
     return df
 
 
-def main_extract_pato_bank_data(path_to_save):
+def main_extract_pato_bank_data(path_to_save_data: str) -> None:
     """
-    Main function to extract data from Pato Bank and save it to an Excel file.
-    Args:
-    path_to_save (str): The path to the directory where the resulting Excel file should be saved.
+    Extracts data from Pato Bank and saves it to an Excel file.
+
+    :param path_to_save_data: A string representing the path to the directory where the resulting Excel file should be saved.
+    :raises TypeError: If the path_to_save parameter is not a string.
+    :raises ValueError: If the path_to_save parameter is an invalid or empty path, or if there is an error extracting or saving the Pato Bank data.
     """
+    # Validate input parameter
+    if not isinstance(path_to_save_data, str):
+        raise TypeError("The path_to_save parameter must be a string.")
 
-    # Set the path to the Tesseract OCR engine executable
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    # Update the path if necessary
+    if not path_to_save_data or not os.path.exists(path_to_save_data):
+        raise ValueError(f"The path to save data '{path_to_save_data}' is invalid or empty.")
 
-    click_pato_bank()
-    pato_bank_text = extract_table_text()
-    df = create_dataframe_from_text(pato_bank_text)
+    try:
+        # Set the path to the Tesseract OCR engine executable
+        pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+        # Update the path if necessary
 
-    remove_existing_file('file1.xlsx')
-    write_dataframe_to_excel(df, 'file1.xlsx')
-
-    sorted_rekv_nrs = extract_and_sort_rekv_numbers(pato_bank_text)
-
-    click_pato_bank()
-
-    df = create_empty_dataframe(KEYWORDS)
-
-    for target_number in sorted_rekv_nrs:
-        find_and_move_to_rekv_column()
-
-        found_number = False
-        while not found_number:
-            cursor_pos = win32api.GetCursorPos()
-            screenshot, screenshot_coords = capture_screenshot(cursor_pos, width=150, height=1000)
-
-            rekv_number_data = handle_rekv_number(target_number, cursor_pos, screenshot, screenshot_coords)
-
-            if rekv_number_data is not None:
-                df = df.append(rekv_number_data, ignore_index=True)
-                found_number = True
-
+        # Click the Pato Bank button and extract the table text
         click_pato_bank()
+        pato_bank_text = extract_table_text()
 
-    remove_existing_file('file2.xlsx')
-    write_dataframe_to_excel(df, 'file2.xlsx')
+        # Create a DataFrame from the extracted text and save it to an Excel file
+        df = create_dataframe_from_text(pato_bank_text)
+        remove_existing_file('file1.xlsx')
+        write_dataframe_to_excel(df, 'file1.xlsx')
 
-    file1 = pd.read_excel('file1.xlsx')
-    file2 = pd.read_excel('file2.xlsx')
+        # Extract and sort the relevant numbers from the table text
+        sorted_rekv_nrs = extract_and_sort_rekv_numbers(pato_bank_text)
 
-    df = pd.concat([file1, file2], ignore_index=True)
-    df = clean_and_organize_dataframe(df, sorted_rekv_nrs)
+        # Click the Pato Bank button again and extract data for each relevant number
+        click_pato_bank()
+        df = create_empty_dataframe(KEYWORDS)
 
-    write_dataframe_to_excel(df, os.path.join(path_to_save, 'pato_bank.xlsx'))
+        for target_number in sorted_rekv_nrs:
+            find_and_move_to_rekv_column()
+
+            found_number = False
+            while not found_number:
+                cursor_pos = win32api.GetCursorPos()
+                screenshot, screenshot_coords = capture_screenshot(cursor_pos, width=150, height=1000)
+
+                rekv_number_data = handle_rekv_number(target_number, cursor_pos, screenshot, screenshot_coords)
+
+                if rekv_number_data is not None:
+                    df = df.append(rekv_number_data, ignore_index=True)
+                    found_number = True
+
+            click_pato_bank()
+
+        # Save the extracted data to an Excel file and clean up temporary files
+        remove_existing_file('file2.xlsx')
+        write_dataframe_to_excel(df, 'file2.xlsx')
+
+        file1 = pd.read_excel('file1.xlsx')
+        file2 = pd.read_excel('file2.xlsx')
+
+        df = pd.concat([file1, file2], ignore_index=True)
+        df = clean_and_organize_dataframe(df, sorted_rekv_nrs)
+
+        write_dataframe_to_excel(df, os.path.join(path_to_save_data, 'pato_bank.xlsx'))
+
+        # Clean up
+        remove_existing_file('file1.xlsx')
+        remove_existing_file('file2.xlsx')
+    except Exception as e:
+        print(f"Failed to extract Pato Bank data: {e} {path_to_save_data}")
