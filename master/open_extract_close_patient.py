@@ -94,7 +94,7 @@ if __name__ == "__main__":
     documents_path = os.path.expanduser("~\Documents")
     root_path = os.path.join(documents_path, root_directory)
 
-    cpr_nrs = read_cpr_nr_from_excel()
+    cpr_nrs = read_cpr_nr_from_excel('cprs.xlsx')
     for cpr_nr in cpr_nrs:
         create_directory(cpr_nr, root_path)
         patient_directory = root_directory + '/' + cpr_nr

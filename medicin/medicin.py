@@ -47,7 +47,7 @@ def main_extract_medicin_data(path_to_save_data):
 
         # Click on the seventh image and wait for 15 seconds
         click_by_mouse_on('images/medicin/07-copy-all.jpg', confidence=0.90)
-        time.sleep(10)
+        time.sleep(15)
 
         # Get the text from the clipboard and save it to an Excel file
         medicin_data = pyperclip.paste()
@@ -63,10 +63,10 @@ def main_extract_medicin_data(path_to_save_data):
         for text in matches_text:
             text_list = text.split("\n")
             for line in text_list:
-                match = re.search(r"\b\d{2}-\d{2}-\d{4}\b", line)
+                match = re.search(r'^(.*?)(\d{2}-\d{2}-\d{4})', line)
                 if match:
-                    med_name = line.split()[0]
-                    med_date = line.split()[1] if re.search(r"\d{2}-\d{2}-\d{4}", line.split()[1]) else line.split()[2]
+                    med_name = match.group(1).strip()
+                    med_date = match.group(2)
                     medications.append({"Medication": med_name, "Date": med_date})
 
         # create dataframe from medications list

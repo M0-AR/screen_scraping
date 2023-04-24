@@ -137,6 +137,9 @@ def extract_miba_data(path_to_save_data: str) -> None:
         # Click on the upper-left corner of the results table
         click_by_mouse_on('images/miba/05-up-left-corner.jpg')
 
+        # Simulate a right-click at the current mouse position
+        pyautogui.rightClick()
+
         # Wait for 2 seconds
         time.sleep(2)
 
@@ -163,4 +166,3 @@ def extract_miba_data(path_to_save_data: str) -> None:
         time.sleep(3)
     except Exception as e:
         print(f"Failed to extract MIBA data: {e} {path_to_save_data}")
-

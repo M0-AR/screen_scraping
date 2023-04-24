@@ -434,6 +434,9 @@ def clean_and_organize_dataframe(df, rekv_nrs):
     # Replace all instances of _x000D_ with a space in all cells of the dataframe df
     df = df.replace('_x000D_', ' ', regex=True)
 
+    # Replace all instances of ':' with nothing in all cells of the dataframe df
+    df = df.replace(':', '', regex=True)
+
     return df
 
 
