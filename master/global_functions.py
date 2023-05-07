@@ -12,6 +12,44 @@ import os
 import shutil
 
 
+def distance(s1, s2):
+    """
+    Calculates the Levenshtein distance between two strings.
+
+    Args:
+        s1 (str): The first string.
+        s2 (str): The second string.
+
+    Returns:
+        The Levenshtein distance between the two strings.
+    """
+    if len(s1) < len(s2):
+        return distance(s2, s1)
+
+    # create two rows of length len(s2) + 1 to hold the distances
+    # from the previous and current row
+    previous_row = range(len(s2) + 1)
+    current_row = [0] * (len(s2) + 1)
+
+    for i, c1 in enumerate(s1):
+        # set the first element of the current row to the row number
+        # (i + 1) to account for the empty prefix
+        current_row[0] = i + 1
+
+        for j, c2 in enumerate(s2):
+            # calculate the minimum of the three possible edit distances
+            insert_cost = current_row[j] + 1
+            delete_cost = previous_row[j + 1] + 1
+            replace_cost = previous_row[j] + (c1 != c2)
+            current_row[j + 1] = min(insert_cost, delete_cost, replace_cost)
+
+        # copy the current row to the previous row for the next iteration
+        previous_row = current_row[:]
+
+    # return the final element of the current row
+    return current_row[-1]
+
+
 def move_file(source_path: str, destination_path: str) -> None:
     """
     Move a file from the source path to the destination path.
