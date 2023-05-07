@@ -53,21 +53,25 @@ def main_extract_medicin_data(path_to_save_data):
         medicin_data = pyperclip.paste()
 
         # using re.DOTALL flag to enable matching across multiple lines
-        regex = r"Receptdetaljer.*?Effektueringsdetaljer"
+        regex = r"Startdato: \d{2}-\d{2}-\d{2} Slutdato: [\d-]+.*?Effektueringsdetaljer"
 
         # extract all matches_text of the pattern
         matches_text = re.findall(regex, medicin_data, re.DOTALL)
 
+        filtered_texts_with_medicin = [text for text in matches_text if 'har ingen aktuelle recepter' not in text]
+
         # extract medication name and date
         medications = []
-        for text in matches_text:
+        for text in filtered_texts_with_medicin:
             text_list = text.split("\n")
+            end_date_pattern = r"Slutdato: ([\d-]+)"
+            end_date = re.search(end_date_pattern, text_list[0]).group(1)
             for line in text_list:
-                match = re.search(r'^(.*?)(\d{2}-\d{2}-\d{4})', line)
-                if match:
-                    med_name = match.group(1).strip()
-                    med_date = match.group(2)
-                    medications.append({"Medication": med_name, "Date": med_date})
+                match_medicin_name_line = re.search(r'^(.*?)(\d{2}-\d{2}-\d{4})', line)
+                if match_medicin_name_line:
+                    med_name = match_medicin_name_line.group(1).strip()
+                    start_date = match_medicin_name_line.group(2)
+                    medications.append({"Medication": med_name, "Start-Date": start_date, "End-Date": end_date})
 
         # create dataframe from medications list
         df = pd.DataFrame(medications)
@@ -76,3 +80,5 @@ def main_extract_medicin_data(path_to_save_data):
         # save_data_to_excel(path_to_save_data, 'medicin', medicin_data, simulate_ctrl_v=True)
     except Exception as e:
         print(f"Failed to extract medicin data: {e} {path_to_save_data}")
+
+
