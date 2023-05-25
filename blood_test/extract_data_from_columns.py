@@ -23,12 +23,6 @@ def go_one_page_back():
 
 
 def select_all_columns_then_copy():
-    # take a screenshot of the entire screen
-    screenshot = pyautogui.screenshot()
-
-    # save the screenshot as a file for to read
-    screenshot.save("number.png")
-
     # Load the screenshot
     screenshotNP = np.array(pyautogui.screenshot())
 
@@ -45,9 +39,6 @@ def select_all_columns_then_copy():
     # Click on the center of the text
     width, height = template.shape[::-1]
     pyautogui.moveTo(x + width / 2, y + height / 2)
-
-    # # Simulate a right-click at the current mouse position
-    ## pyautogui.click()
 
     # Move the mouse right by 150 pixels and down by 90 pixels
     y = y + 90
