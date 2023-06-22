@@ -12,42 +12,49 @@ import os
 import shutil
 
 
-def distance(s1, s2):
+def remove_existing_file(file_path):
     """
-    Calculates the Levenshtein distance between two strings.
+    Remove existing file if it exists.
 
     Args:
-        s1 (str): The first string.
-        s2 (str): The second string.
-
-    Returns:
-        The Levenshtein distance between the two strings.
+        file_path (str): The path to the file that should be removed.
     """
-    if len(s1) < len(s2):
-        return distance(s2, s1)
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
-    # create two rows of length len(s2) + 1 to hold the distances
-    # from the previous and current row
-    previous_row = range(len(s2) + 1)
-    current_row = [0] * (len(s2) + 1)
 
-    for i, c1 in enumerate(s1):
-        # set the first element of the current row to the row number
-        # (i + 1) to account for the empty prefix
-        current_row[0] = i + 1
+# https://blog.paperspace.com/implementing-levenshtein-distance-word-autocomplete-autocorrect/
+def lev_dist(token1, token2):
+    distances = np.zeros((len(token1) + 1, len(token2) + 1))
 
-        for j, c2 in enumerate(s2):
-            # calculate the minimum of the three possible edit distances
-            insert_cost = current_row[j] + 1
-            delete_cost = previous_row[j + 1] + 1
-            replace_cost = previous_row[j] + (c1 != c2)
-            current_row[j + 1] = min(insert_cost, delete_cost, replace_cost)
+    for t1 in range(len(token1) + 1):
+        distances[t1][0] = t1
 
-        # copy the current row to the previous row for the next iteration
-        previous_row = current_row[:]
+    for t2 in range(len(token2) + 1):
+        distances[0][t2] = t2
+        
+    a = 0
+    b = 0
+    c = 0
+    
+    for t1 in range(1, len(token1) + 1):
+        for t2 in range(1, len(token2) + 1):
+            if (token1[t1-1] == token2[t2-1]):
+                distances[t1][t2] = distances[t1 - 1][t2 - 1]
+            else:
+                a = distances[t1][t2 - 1]
+                b = distances[t1 - 1][t2]
+                c = distances[t1 - 1][t2 - 1]
+                
+                if (a <= b and a <= c):
+                    distances[t1][t2] = a + 1
+                elif (b <= a and b <= c):
+                    distances[t1][t2] = b + 1
+                else:
+                    distances[t1][t2] = c + 1
 
-    # return the final element of the current row
-    return current_row[-1]
+    return distances[len(token1)][len(token2)]
+
 
 
 def move_file(source_path: str, destination_path: str) -> None:
@@ -78,7 +85,7 @@ def move_file(source_path: str, destination_path: str) -> None:
     return None
 
 
-def input_text_in_field(text: str, image_path: str, x: int, y: int) -> None:
+def input_text_in_field(text: str, image_path: str, x: int, y: int, confidence: float = 0.0) -> None:
     """
     Inputs a text into a designated field on a GUI.
 
@@ -100,7 +107,7 @@ def input_text_in_field(text: str, image_path: str, x: int, y: int) -> None:
         raise TypeError("x and y parameters must be integers.")
 
     # Click on the GUI element
-    click_by_mouse_on(image_path, x, y)
+    click_by_mouse_on(image_path, x, y, confidence)
 
     # Copy the CPR number to the clipboard
     pyperclip.copy(text)
@@ -118,6 +125,7 @@ def move_mouse_on(
         position: str,
         move_x: int = 0,
         move_y: int = 0,
+        confidence: float = 0.0
 ) -> None:
     """Find an image or text on the screen and move a mouse
 
@@ -127,6 +135,9 @@ def move_mouse_on(
             after finding the image or text. Defaults to 0.
         move_y (int, optional): The amount to move the mouse cursor on the Y-axis
             after finding the image or text. Defaults to 0.
+        confidence (float, optional): The minimum confidence level for the image
+            or text match. If set to 0, the function will use text recognition
+            instead of image matching. Defaults to 0.
 
     Returns:
         None: The function does not return a value.
@@ -145,6 +156,51 @@ def move_mouse_on(
     template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
     # Find the text on the screenshot using template matching
     result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+    
+    if np.max(result) >= confidence:
+        # Get position of highest correlation
+        y, x = np.unravel_index(result.argmax(), result.shape)
+        # Move the mouse to the desired position
+        x = x + move_x
+        y = y + move_y
+        pyautogui.moveTo(x, y, duration=1)
+        # Click on the center of the text
+        width, height = template.shape[::-1]
+        pyautogui.moveTo(x + width / 2, y + height / 2)
+    else:
+        print(f"Could not locate {position} image on the screen")
+
+
+def click_by_mouse_on_without_threshold(
+        position: str,
+        move_x: int = 0,
+        move_y: int = 0,
+) -> None:
+    """Find an image or text on the screen and perform a mouse click.
+
+    Args:
+        position (str): The image or text to be searched on the screen.
+        move_x (int, optional): The amount to move the mouse cursor on the X-axis
+            after finding the image or text. Defaults to 0.
+        move_y (int, optional): The amount to move the mouse cursor on the Y-axis
+            after finding the image or text. Defaults to 0.
+    Returns:
+        None: The function does not return a value.
+
+    Raises:
+        Exception: If the image or text cannot be located on the screen.
+    """
+    # Use text recognition to find the position on the screen
+    # Take a screenshot of the entire screen
+    screenshot = pyautogui.screenshot()
+    # Load the screenshot as a NumPy array
+    screenshot_np = np.array(screenshot)
+    # Convert the screenshot to grayscale
+    gray = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2GRAY)
+    # Load the template image
+    template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
+    # Find the text on the screenshot using template matching
+    result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
     y, x = np.unravel_index(result.argmax(), result.shape)
     # Move the mouse to the desired position
     x = x + move_x
@@ -152,8 +208,8 @@ def move_mouse_on(
     pyautogui.moveTo(x, y, duration=1)
     # Click on the center of the text
     width, height = template.shape[::-1]
-    pyautogui.moveTo(x + width / 2, y + height / 2)
-
+    pyautogui.click(x + width / 2, y + height / 2)
+        
 
 def click_by_mouse_on(
         position: str,
@@ -190,7 +246,6 @@ def click_by_mouse_on(
             pyautogui.moveTo(x + move_x, y + move_y, duration=1)
             pyautogui.click()
     else:
-        # Use text recognition to find the position on the screen
         # Take a screenshot of the entire screen
         screenshot = pyautogui.screenshot()
         # Load the screenshot as a NumPy array
@@ -201,14 +256,20 @@ def click_by_mouse_on(
         template = cv2.imread(position, cv2.IMREAD_GRAYSCALE)
         # Find the text on the screenshot using template matching
         result = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-        y, x = np.unravel_index(result.argmax(), result.shape)
-        # Move the mouse to the desired position
-        x = x + move_x
-        y = y + move_y
-        pyautogui.moveTo(x, y, duration=1)
-        # Click on the center of the text
-        width, height = template.shape[::-1]
-        pyautogui.click(x + width / 2, y + height / 2)
+        # Set correlation threshold
+        threshold = 0.8
+        if np.max(result) >= threshold:
+            # Get position of highest correlation
+            y, x = np.unravel_index(result.argmax(), result.shape)
+            # Move the mouse to the desired position
+            x = x + move_x
+            y = y + move_y
+            pyautogui.moveTo(x, y, duration=1)
+            # Click on the center of the text
+            width, height = template.shape[::-1]
+            pyautogui.click(x + width / 2, y + height / 2)
+        else:
+            print(f"Could not locate {position} image on the screen")
 
 
 def write_dataframe_to_excel(df, file_path, index=False):
@@ -380,6 +441,19 @@ def press_ctrl_v():
     # Delay for 1 second
     time.sleep(1)
 
+def press(btn1, btn2):
+    # Press and hold the btn1 key
+    keyboard.press(btn1)
+
+    # Press and release the btn2 key
+    keyboard.press(btn2)
+    keyboard.release(btn2)
+
+    # Release the btn1 key
+    keyboard.release(btn1)
+
+    # Delay for 1 second
+    time.sleep(1)
 
 def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_position, end_scroll_position,
                                     confidence_of_end_scroll,
@@ -409,16 +483,15 @@ def select_and_copy_data_from_table(up_left_corner_position, up_right_corner_pos
     # Click and hold the left mouse button
     pyautogui.mouseDown(button='left')
 
-    print(up_right_corner_position)
     # Get the position of the up-right corner image, and move the mouse to that position
-    result = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.9)
+    result = pyautogui.locateCenterOnScreen(up_right_corner_position, confidence=0.8)
     x, y = 0, 0
     if result is not None:
         x, y = result
         pyautogui.moveTo(x + move_x, y + move_y, duration=1)
     else:
         # Handle no scroll-bar case
-        x, y = pyautogui.locateCenterOnScreen('images/pato_bank/07-temp-top-right-selection-rekv-nr.jpg',
+        x, y = pyautogui.locateCenterOnScreen('master/images/pato_bank/07-temp-top-right-selection-rekv-nr.jpg',
                                               confidence=0.8)
         pyautogui.moveTo(x + move_x, y + move_y, duration=1)
 

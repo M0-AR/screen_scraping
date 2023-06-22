@@ -1,8 +1,9 @@
 import os
 import time
 import pandas as pd
-
-from global_functions import click_by_mouse_on, save_data_to_excel, create_directory
+import math
+import re
+from global_functions import click_by_mouse_on, click_by_mouse_on_without_threshold, save_data_to_excel, create_directory
 
 
 def read_cpr_nr_from_excel(file_path: str) -> list:
@@ -18,8 +19,8 @@ def read_cpr_nr_from_excel(file_path: str) -> list:
     if not isinstance(file_path, str):
         raise TypeError("The file_path parameter must be a string.")
 
-    if not file_path or not os.path.exists(file_path):
-        raise ValueError(f"The file path '{file_path}' is invalid or empty.")
+    #if not file_path or not os.path.exists(file_path):
+        #raise ValueError(f"The file path '{file_path}' is invalid or empty.")
 
     try:
         # Read the Excel file
@@ -61,7 +62,7 @@ def extract_blood_test_data(path_to_save_data: str) -> None:
     :raises ValueError: If the patient_path parameter is an invalid or empty path, or if there is an error extracting or saving the blood test data.
     """
     from blood_test.extract_data_from_columns import extract_blood_test_data_from_columns
-
+    
     # Validate input parameter
     if not isinstance(path_to_save_data, str):
         raise TypeError("The patient_path parameter must be a string.")
@@ -71,21 +72,33 @@ def extract_blood_test_data(path_to_save_data: str) -> None:
 
     try:
         # Extract blood test data
-        click_by_mouse_on('images/blood_test/02-laboratoriesvar.jpg')
+        click_by_mouse_on('master/images/blood_test/02-laboratoriesvar.jpg')
 
         # Delay the click for 5 seconds
         time.sleep(5)
 
         all_data = extract_blood_test_data_from_columns()
 
-        save_data_to_excel(path_to_save_data, 'blood_test', all_data)
+        # create a regular expression pattern to match "xxxxxx-xxxx" format
+        pattern = r'^\d{6}-\d{4}\n*$'
+        match = re.search(pattern, all_data)
 
+        if match:
+            print(f"No blood test data exist for: {path_to_save_data}")
+        else:
+            save_data_to_excel(path_to_save_data, 'blood_test', all_data)
+            
         # Delay the click for 5 seconds
         time.sleep(5)
     except Exception as e:
         print(f"Failed to extract blood test data: {e} {path_to_save_data}")
 
-
+def isnan(value):
+    try:
+        return math.isnan(float(value))
+    except:
+        return False
+    
 if __name__ == "__main__":
     # Create a directory named 'HospitalData' in the current working directory
     root_directory = 'HospitalData'
@@ -94,46 +107,43 @@ if __name__ == "__main__":
     documents_path = os.path.expanduser("~\Documents")
     root_path = os.path.join(documents_path, root_directory)
 
-    cpr_nrs = read_cpr_nr_from_excel('cprs.xlsx')
-    for cpr_nr in cpr_nrs:
+    prev_cpr = ''
+    cpr_nrs = read_cpr_nr_from_excel('master/cprs.xlsx')
+    for cpr_nr in cpr_nrs: 
+        if prev_cpr == cpr_nr or isnan(cpr_nr):
+            continue
+        prev_cpr = cpr_nr
+
         create_directory(cpr_nr, root_path)
         patient_directory = root_directory + '/' + cpr_nr
         patient_path = os.path.join(documents_path, patient_directory)
 
-        click_by_mouse_on('images/general/01-patientopslag.jpg')
+        time.sleep(2)
+
+        click_by_mouse_on('master/images/general/01-patientopslag.jpg')
         # Delay the click for 2 second
         time.sleep(2)
 
-        input_cpr_nr(cpr_nr, 'images/general/02-navn-or-cprNr.jpg', 250, 0)
+        input_cpr_nr(cpr_nr, 'master/images/general/02-navn-or-cprNr.jpg', 250, 0)
         # Delay the click for 2 second
         time.sleep(2)
 
-        click_by_mouse_on('images/general/03-find-patient.jpg')
+        click_by_mouse_on('master/images/general/03-find-patient.jpg')
         # Delay the click for 1 second
         time.sleep(3)
 
-        click_by_mouse_on('images/general/04-vaelg.jpg')
+        click_by_mouse_on('master/images/general/04-vaelg.jpg')
         # Delay the click for 2 second
-        time.sleep(2)
+        time.sleep(15)
 
-        click_by_mouse_on('images/general/05-if-aabn-journal.jpg')
+        click_by_mouse_on('master/images/general/05-if-aabn-journal.jpg')
         # Delay the click for 2 second
-        time.sleep(4)
+        time.sleep(10)
 
         #################################################
         # Extract blood test data
         extract_blood_test_data(patient_path)
         # End of extracting blood test data
-        #################################################
-
-        time.sleep(2)
-
-        #################################################
-        # Extract miba data
-        from miba.miba import extract_miba_data
-
-        extract_miba_data(patient_path)
-        # End of extracting miba data
         #################################################
 
         time.sleep(2)
@@ -149,16 +159,6 @@ if __name__ == "__main__":
         time.sleep(2)
 
         #################################################
-        # Extract diagnose_list data
-        from diagnose_liste.diagnose_list import main_extract_diagnose_list_data
-
-        main_extract_diagnose_list_data(patient_path)
-        # End of extracting diagnose_list data
-        #################################################
-
-        time.sleep(2)
-
-        #################################################
         # Extract vitale data
         from vitale.vitale import main_extract_vitale_data
 
@@ -167,8 +167,8 @@ if __name__ == "__main__":
         #################################################
 
         time.sleep(2)
-        click_by_mouse_on('images/general/06-vis-journal.jpg')
-        time.sleep(2)
+        click_by_mouse_on('master/images/general/06-vis-journal.jpg')
+        time.sleep(6)
 
         #################################################
         # Extract notater data
@@ -190,6 +190,26 @@ if __name__ == "__main__":
 
         time.sleep(2)
 
-        click_by_mouse_on('images/general/08-close-by-x.jpg', 40, 0)
-        # Delay the click for 1 second
+        #################################################
+        # Extract miba data
+        from miba.miba import extract_miba_data
+
+        extract_miba_data(patient_path)
+        # End of extracting miba data
+        #################################################
+
         time.sleep(2)
+
+        #################################################
+        # Extract diagnose_list data
+        from diagnose_liste.diagnose_list import main_extract_diagnose_list_data
+
+        main_extract_diagnose_list_data(patient_path)
+        # End of extracting diagnose_list data
+        #################################################
+
+        time.sleep(5)
+
+        click_by_mouse_on_without_threshold('master/images/general/08-close-by-x.jpg', 20, 0)
+        # Delay the click for 1 second
+        time.sleep(12)
