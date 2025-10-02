@@ -1,128 +1,153 @@
-# AI project is being undertaken in collaboration with RUC and DTU
-The project is focused on a particular group of patients, and its objective is to extract relevant data from the Epic software and store it in Excel files. 
-It is important to note that the study has received all the necessary permissions from the Danish Board of Health to be conducted.
+# Project Title: AI-Powered Medical Data Extraction
 
-# Run the software on a new machine 
-First, install Python on your system. Then, navigate to the master folder in the command line and run the command `Python -m pip install -r requirements.txt` to install all 
-the necessary libraries listed in the `requirements.txt` file either globally or in a virtual environment. 
+**A collaborative project between Roskilde University (RUC) and the Technical University of Denmark (DTU) to automate the extraction of patient data from the Epic software.**
 
-Once the libraries are installed, you can run the module using Python by executing the command `python open_extract_close_patient.py`
+---
 
-### To ensure that the software runs correctly, please follow these steps:
+## Table of Contents
+- [Project Overview](#project-overview)
+- [For End-Users](#for-end-users)
+- [For Developers](#for-developers)
+- [Dependencies](#dependencies)
+- [Project Status](#project-status)
+- [License](#license)
 
-1. Create a cprs.xlsx file that contains all the CPR numbers that should be used to extract the data. 
-   The cprs.xlsx file should have a column named "cpr" and look like the example below:
+---
 
+## Project Overview
+
+### The Challenge
+Medical professionals and researchers at Roskilde University (RUC) and the Technical University of Denmark (DTU) frequently need to extract large volumes of patient data from the Epic electronic health record system for clinical studies. This process, when done manually, is repetitive, time-consuming, and prone to data entry errors.
+
+### Our Solution
+This project provides an intelligent automation tool that mimics human interaction to extract data from the Epic software. It navigates the Epic interface, identifies the correct patient records, and copies the required information into organized Excel files. The project is conducted with full approval from the Danish Board of Health, ensuring data privacy and compliance are respected.
+
+### Business Value
+- **Increased Efficiency:** Drastically reduces the time spent on manual data collection, allowing staff to perform higher-value tasks.
+- **Improved Data Accuracy:** Eliminates human error from manual copy-pasting, ensuring the reliability of data for research and analysis.
+- **Scalability:** The modular design allows the tool to be easily extended to extract new types of data as research needs evolve.
+- **Cost Savings:** Reduces the person-hours required for data extraction, leading to significant operational cost savings.
+
+---
+
+## For End-Users
+
+### How to Use the Software
+To run the data extraction tool, please follow these steps carefully:
+
+1. **Prepare Your CPR Numbers:**
+   - Create an Excel file named `cprs.xlsx`.
+   - In this file, create a single column with the header "cpr".
+   - List all the patient CPR numbers you want to process in this column.
    ![example Excel file](images/example-of-cpr-nr-in-excel.jpg)
 
-
-2. Ensure that the Epic program is open before running the python open_extract_close_patient.py module. 
-   Navigate to the appropriate page as shown in the image below before running the module. 
-   This will ensure that the module runs correctly and extracts the desired data.
+2. **Open Epic:**
+   - Before running the software, make sure the Epic application is open on your computer.
+   - Navigate to the correct starting page within Epic as shown in the image below. This is crucial for the software to find the correct buttons and fields.
    ![example Epic software](images/front-page-of-epic.jpg)
 
+3. **Run the Software:**
+   - Open your command line or terminal.
+   - Navigate to the `master` folder of this project.
+   - Run the command: `python open_extract_close_patient.py`
 
-# For new developers want to participate
+The software will then begin processing the patients one by one.
 
+---
 
-### First: Develop a new module
-The first step for developers is to create a new module by creating a folder that corresponds to the specific data they are trying to extract. 
-It is important for them to ensure that their module contains a main function that can be called by the master to run their module.
+## For Developers
 
-### Second: Integrate the module to the master folder
-The next step is to integrate their module into the master folder. The master folder contains a module named 'open_extract_close_patient.py' 
-with a main function that clicks on an image in Epic software called 06-laboratoriesvar.jpg, waits for a specified amount of time to ensure data loading, 
-and then calls the extract_blood_test_data_from_columns() function to begin creating an Excel file for the patient. Please look at the example below:
+### Architecture Overview
+The core of this project is a Robotic Process Automation (RPA) script that uses GUI automation to drive the Epic desktop application.
 
-```
-#################################################
-click_by_mouse_on('06-laboratoriesvar.jpg')
-# Delay the click for 5 second
-time.sleep(5)
+- **Orchestrator (`open_extract_close_patient.py`):** This is the main script. It reads a list of CPR numbers from `cprs.xlsx`, and for each patient, it automates the process of searching, opening the patient's file, and closing it after extraction is complete.
 
-from blood_test.extract_data_from_columns \
-    import extract_blood_test_data_from_columns
-extract_blood_test_data_from_columns(cpr_nr)
-# Delay the click for 2 second
-time.sleep(2)
-# End of extracting blood test data
-#################################################
-```
+- **Extractor Modules:** The actual data extraction is handled by a series of "plug-in" modules located in their respective subdirectories (e.g., `blood_test`, `medicin`). The orchestrator calls these modules in sequence. Each module is responsible for navigating to a specific section of the Epic application and extracting the relevant data, typically using screen scraping (OCR) or by automating data export features if available.
 
-### Third:
-When you are done with your module please make sure to have requirments.txt file that has all the necseesry library need to be installed in order to run your module
+- **GUI Automation:** The automation is powered by libraries like `PyAutoGUI` and `opencv-python`. It relies on finding specific images (buttons, icons, text fields) on the screen to navigate the application. These template images are stored in the `master/images` directory.
 
-## Comment
-It is essential for new developers to carefully follow these instructions to ensure that their modules are properly integrated into the project and that they contribute to the overall success of the project.
-
-### Flowchart-Diagram
+#### Flowchart
 ![flow-chart](images/extract-data-flow-chart.png)
 
+### Project Structure
+```
+.
+├── master/
+│   ├── blood_test/            # Module for extracting blood test data.
+│   ├── diagnose_liste/        # Module for extracting diagnosis lists.
+│   ├── medicin/               # Module for extracting medication lists.
+│   ├── ...                    # Other data extraction modules.
+│   ├── images/                # Contains all the .jpg/.png image snippets used by PyAutoGUI to find and click UI elements.
+│   ├── log/                   # Directory for log files (if any).
+│   ├── cprs.xlsx              # (Input) A list of CPR numbers to be processed.
+│   ├── global_functions.py    # (Optional) Shared functions used across multiple modules.
+│   ├── open_extract_close_patient.py  # Main orchestration script that runs the end-to-end process.
+│   └── requirements.txt       # A list of all Python packages required to run the project.
+└── README.md                  # This file, providing project documentation.
+```
 
-#### The following is a list of Python libraries used by the project:
+### Getting Started for Developers
+1.  **Clone the Repository:**
+    `git clone <repository-url>`
+2.  **Set Up a Virtual Environment (Recommended):**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    ```
+3.  **Install Dependencies:**
+    - Navigate to the `master` folder.
+    - Run `pip install -r requirements.txt`.
 
-- argcomplete: provides easy command line argument completion.
-- beautifulsoup4: provides tools for web scraping and parsing HTML and XML documents.
-- chardet: detects the encoding of a byte stream or file.
-- compressed-rtf: decompresses RTF (Rich Text Format) files.
-- docx2txt: extracts plain text from Microsoft Word (DOCX) files.
-- ebcdic: provides tools for converting between EBCDIC and ASCII text.
-- et-xmlfile: provides low-level support for working with XML files in Excel.
-- extract-msg: extracts data and attachments from Outlook MSG files.
-- html5lib: provides a pure Python HTML parser for web scraping and parsing HTML documents.
-- IMAPClient: provides an easy-to-use client interface for IMAP (Internet Message Access Protocol) servers.
-- keyboard: provides a cross-platform way to listen for keyboard events.
-- lxml: provides high-performance tools for parsing XML and HTML documents.
-- MouseInfo: provides tools for getting the current position and color of the mouse cursor.
-- numpy: provides tools for working with arrays and numerical data.
-- olefile: provides tools for working with OLE (Object Linking and Embedding) files.
-- opencv-python: provides computer vision tools, including image processing and object detection.
-- openpyxl: provides tools for working with Excel files in Python.
-- packaging: provides tools for building and distributing Python packages.
-- pandas: provides tools for working with structured data in Python.
-- pdfminer.six: provides tools for extracting text and data from PDF files.
-- Pillow: provides tools for working with images in Python.
-- PyAutoGUI: provides tools for controlling the mouse and keyboard programmatically.
-- pycryptodome: provides cryptographic tools and algorithms.
-- PyGetWindow: provides tools for getting information about windows on the screen.
-- PyMsgBox: provides tools for displaying message boxes and dialogs.
-- pyperclip: provides tools for copying and pasting text to and from the clipboard.
-- PyRect: provides tools for working with rectangles in Python.
-- PyScreeze: provides tools for taking screenshots and finding images on the screen.
-- pytesseract: provides tools for optical character recognition (OCR).
-- python-dateutil: provides tools for working with dates and times in Python.
-- python-pptx: provides tools for working with PowerPoint files in Python.
-- pytweening: provides tools for tweening (interpolating) between values.
-- pytz: provides tools for working with time zones in Python.
-- pytz-deprecation-shim: provides a shim for deprecated pytz module behavior.
-- pywin32: provides tools for working with Windows APIs and COM objects.
-- six: provides Python 2 and 3 compatibility utilities.
-- sortedcontainers: provides fast, pure-Python implementation of sorted collections.
-- soupsieve: provides a CSS selector library for parsing HTML and XML documents.
-- SpeechRecognition: provides tools for performing speech recognition.
-- tesseract: provides tools for optical character recognition (OCR).
-- textract: provides tools for extracting text from various file formats.
-- tzdata: provides the IANA Time Zone database.
-- tzlocal: provides tools for getting the local timezone in Python.
-- webencodings: provides tools for working with HTML and XML character encodings.
-- xlrd: provides tools for reading Excel files in Python.
-- XlsxWriter: provides tools for writing Excel files in Python.
+### How to Contribute
+The most common way to contribute is by adding a new module to extract a new piece of data.
 
+1.  **Create a Module Directory:**
+    - Inside the `master` directory, create a new folder with a descriptive name for the data you're extracting (e.g., `allergy_list`).
 
-# Dependency Management
+2.  **Develop Your Extraction Logic:**
+    - Inside your new directory, create a Python script (e.g., `extract_allergies.py`).
+    - This script should contain a primary function (e.g., `extract(cpr_nr)`) that performs the GUI automation to find and save the data.
+    - Use the `images` folder to store any new UI screenshots needed for your automation.
 
-## The problem
-Be aware of the cost and try to use the standard library as much as you can
+3.  **Integrate into the Main Orchestrator:**
+    - Open `master/open_extract_close_patient.py`.
+    - Import your new function at the top of the file.
+    - Find the main loop that processes each patient and add a call to your function in the appropriate sequence.
+    ```python
+    # ... inside the main processing loop ...
 
-[Malicious Python libraries targeting Linux servers removed from PyPI](https://www.zdnet.com/article/malicious-python-libraries-targeting-linux-servers-removed-from-pypi/)
+    # Call the existing blood test module
+    from blood_test.extract_data_from_columns import extract_blood_test_data_from_columns
+    extract_blood_test_data_from_columns(cpr_nr)
+    time.sleep(2)
 
-[Our Software Dependency Problem](https://research.swtch.com/deps)
+    # Add your new module call here
+    from allergy_list.extract_allergies import extract
+    extract(cpr_nr)
+    time.sleep(2)
+    ```
 
-## Package managers
-Specify which version of a package you want to install. It will save you from surprises in the future when someone accidentally introduces a bug or a change to a function parameters.
+4.  **Update Requirements:**
+    - If your new module requires any Python packages not already in `master/requirements.txt`, add them to the file.
 
-[Pipenv: Python Dev Workflow for Humans](https://pipenv.pypa.io/en/latest/)
+---
 
-## Virtualenvs
-A python interpreter can work with only one version of a package at a time. If you work on two projects, one using pandas 0.22, and the other using pandas 0.25, this can be an issue.
+## Dependencies
+This project relies on a number of external Python libraries. Below is a list of the key dependencies. Please see the `master/requirements.txt` file for a complete list.
 
+*   **GUI Automation:** `PyAutoGUI`, `opencv-python`, `Pillow`
+*   **Data Handling:** `pandas`, `openpyxl`, `numpy`
+*   **File Extraction:** `textract`, `pdfminer.six`, `python-docx`
+*   **OCR:** `pytesseract`
+
+**Note on Dependencies:** This project has a large number of dependencies, which can introduce security risks and maintenance overhead. Please use standard libraries where possible and carefully consider the need for any new external packages.
+
+---
+
+## Project Status
+This project is actively being used and developed.
+
+---
+
+## License
+[Specify a license, e.g., MIT, GPL, etc. If none, state that it is a proprietary/closed-source project.]
