@@ -290,6 +290,7 @@ Automating a clinical system is not a toy. These principles are part of the desi
 
 - **Authorization first.** Use the suite only on systems you are explicitly permitted to automate, with approval from the system owner.
 - **Local by default.** No cloud service, no telemetry, no upload. Data is written to the local `Documents` folder.
+- **Run logs stay local.** `master/log/` is excluded from version control because log lines can contain CPR numbers. Keep logs on the workstation and handle them under your retention policy.
 - **Human review required.** Extracted data must be validated before research use. Automation reduces effort; it does not certify accuracy.
 - **Compliance stays with the institution.** GDPR, research ethics, retention rules, and Epic's terms of use remain the responsibility of the deploying organization.
 - **No certification claims.** This repository is not a medical device and does not claim regulatory approval. Any pilot should follow your institution's data-protection and security review.
